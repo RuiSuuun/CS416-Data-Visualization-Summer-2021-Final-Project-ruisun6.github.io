@@ -1,8 +1,8 @@
-homelat,homelon,home,n
--22.9,-43.2,Rio,1
-51.5,0,London,1
-40.0,116.4,Beijing,1
-38.0,23.7,Athens,1
--33.7,151.2,Sydney,1
-33.7,-84.4,Atlanta,1
-41.4,2.2,Barcelona,1
+homelat,homelon,home,n,year,motto
+-22.9,-43.2,Rio,1,2016,A new world
+51.5,0,London,1,2012,Inspire a Generation
+40.0,116.4,Beijing,1,2008,"One World, One Dream"
+38.0,23.7,Athens,1,2004,Welcome Home
+-33.7,151.2,Sydney,1,2000,The games of the new millennium Share the Spirit - Dare to dream
+33.7,-84.4,Atlanta,1,1996,The Celebration of the Century
+41.4,2.2,Barcelona,1,1992,Friends For Life

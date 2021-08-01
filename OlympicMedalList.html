@@ -5,7 +5,7 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 
 <!-- Create a div where the graph will take place -->
-<h1>Olympic Track & Field Medal List</h1>
+<h1>Olympic Track & Field Gold List</h1>
 <div id="my_dataviz"></div>
 <br/>
 <a href="index.html">Previous: Holding Location</a>
@@ -14,56 +14,86 @@
 <script>
 
     // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    var margin = {top: 30, right: 30, bottom: 70, left: 60},
         width = 800 - margin.left - margin.right,
-        height = 600 - margin.top - margin.bottom;
+        height = 460 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
 
-    // get the data
-    d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/1_OneNum.csv", function(data) {
+    // Parse the Data
+    d3.csv("results.csv", function(data) {
 
-      // X axis: scale and draw:
-      var x = d3.scaleLinear()
-          .domain([0, 1000])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.price })
-          .range([0, width]);
-      svg.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x));
+        var countries = d3.map(data, function(d){return(d.Nationality)}).keys();
+        var country_gold = {};
 
-      // set the parameters for the histogram
-      var histogram = d3.histogram()
-          .value(function(d) { return d.price; })   // I need to give the vector of value
-          .domain(x.domain())  // then the domain of the graphic
-          .thresholds(x.ticks(70)); // then the numbers of bins
+        for (i in countries) {
+            var name = countries[i];
+            var gold = data.filter(function(d){return d.Nationality == name && d.Medal == "G"})
+            country_gold[name] = gold.length
+        }
 
-      // And apply this function to data to get the bins
-      var bins = histogram(data);
+        // sort data
+        var country_gold_sort = Object.keys(country_gold).map((key) => [key, Number(country_gold[key])]).sort((a,b) => b[1] - a[1]);
+        var vis_gold = country_gold_sort.slice(0, 10)
 
-      // Y axis: scale and draw:
-      var y = d3.scaleLinear()
-          .range([height, 0]);
-          y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
-      svg.append("g")
-          .call(d3.axisLeft(y));
+        // X axis
+        var x = d3.scaleBand()
+            .range([ 0, width ])
+            .domain(vis_gold.map(function(d) { return d[0]; }))
+            .padding(0.2);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .attr("transform", "translate(-10,0)rotate(-45)")
+            .style("text-anchor", "end");
 
-      // append the bar rectangles to the svg element
-      svg.selectAll("rect")
-          .data(bins)
-          .enter()
-          .append("rect")
-            .attr("x", 1)
-            .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
-            .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
-            .attr("height", function(d) { return height - y(d.length); })
-            .style("fill", "#69b3a2")
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([0, 300])
+            .range([ height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
 
-    });
-    </script>
+        // create a tooltip
+        var Tooltip = d3.select("#my_dataviz")
+                        .append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 1)
+                        .style("background-color", "white")
+                        .style("border", "solid")
+                        .style("border-width", "2px")
+                        .style("border-radius", "5px")
+                        .style("padding", "5px")
+                        .style("opacity", 0)
+
+        // Bars
+        svg.selectAll("mybar")
+            .data(vis_gold)
+            .enter()
+            .append("rect")
+            .attr("x", function(d) { return x(d[0]); })
+            .attr("y", function(d) { return y(d[1]); })
+            .attr("width", x.bandwidth())
+            .attr("height", function(d) { return height - y(d[1]); })
+            .attr("fill", "#69b3a2")
+            .on("mouseover", function(d) {
+                Tooltip.style("opacity", 1)
+            })
+            .on("mousemove", function(d) {
+                Tooltip.html("Country: " + d[0] + "<br>" + "Gold: " + d[1])
+                .style("left", (d3.mouse(this)[0]+10) + "px")
+                .style("top", (d3.mouse(this)[1]) + "px")
+            })
+            .on("mouseleave", function(d) {Tooltip.style("opacity", 0)})
+
+    })
+
+</script>

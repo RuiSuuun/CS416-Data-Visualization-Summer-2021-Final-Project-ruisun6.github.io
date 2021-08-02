@@ -3,6 +3,7 @@
 
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
+<title>Here is Olympics!</title>
 
 <!-- Create a div where the graph will take place -->
 <h1>Olympic Track & Field Gold List</h1>
@@ -29,14 +30,15 @@
 
     // Parse the Data
     d3.csv("results.csv", function(data) {
+        console.log(data)
 
         var countries = d3.map(data, function(d){return(d.Nationality)}).keys();
         var country_gold = {};
 
         for (i in countries) {
             var name = countries[i];
-            var gold = data.filter(function(d){return d.Nationality == name && d.Medal == "G"})
-            country_gold[name] = gold.length
+            var gold = data.filter(function(d){return d.Nationality == name && d.Medal == "G"});
+            country_gold[name] = gold.length;
         }
 
         // sort data
